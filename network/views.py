@@ -176,4 +176,25 @@ def edit_post(request, post_id):
             post.save()
             return JsonResponse({'content': post.content})
     return JsonResponse({"error": "Invalid Request"}, status=400)
+
+
+@login_required
+def like(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
     
+    if request.method == 'POST':
+        post.likes.add(request.user)
+        post.save()
+        return JsonResponse({'likes_count': post.likes.count()})
+    return JsonResponse({"error": "Invalid Request"}, status=400)
+
+
+@login_required
+def unlike(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    
+    if request.method == 'POST':
+        post.likes.remove(request.user)
+        post.save()
+        return JsonResponse({'likes_count': post.likes.count()})
+    return JsonResponse({"error": "Invalid Request"}, status=400)

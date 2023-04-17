@@ -25,7 +25,16 @@
             </div>
             <div class="card-body">
                 <p id="post-content-{{ post.id }}">{{ post.content }}</p>
-                <p>Likes: {{ post.likes }}</p>
+                <p>
+                    <button id="like-button-{{ post.id }}" class="like-button btn btn-sm {% if user in post.likes.all %}btn-danger{% else %}btn-outline-danger{% endif %}" data-post="{{ post.id }}">
+                        {% if user in post.likes.all %}
+                            Unlike
+                        {% else %}
+                            Like
+                        {% endif %}
+                    </button>
+                    <span id="like-count-{{ post.id }}">{{ post.likes.count }}</span> Likes
+                </p>
             </div>
         </div>
     {% endfor %}

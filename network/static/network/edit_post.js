@@ -15,6 +15,7 @@ function getCookie(name) {
 
 
 document.addEventListener('DOMContentLoaded', function() {
+    // edit button functionality
     document.querySelectorAll('.edit-button').forEach(function(button) {
         button.onclick = function() {
             let postId = button.dataset.post;
@@ -77,4 +78,55 @@ document.addEventListener('DOMContentLoaded', function() {
             button.style.display = 'none';
         };
     });
+});
+
+
+// Like button functionality
+document.querySelectorAll('.like-button').forEach(function(button) {
+    let postId = button.dataset.post;
+    let likeCountElement = document.querySelector(`#like-count-${postId}`);
+
+    button.onclick = function() {
+        let liked = button.innerHTML === 'Unlike';
+
+        if (liked) {
+            // Unlike the post
+            fetch(`/unlike/${postId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => {
+                console.log('Response:', response);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Received data:', data);
+                button.innerHTML = 'Like';
+                button.classList.remove('btn-danger');
+                button.classList.add('btn-outline-danger');
+                likeCountElement.innerHTML = data.likes_count;
+            });
+        } else {
+            // Like the post
+            fetch(`/like/${postId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                }
+            })
+            .then(response => {
+                console.log('Response:', response);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Received data:', data);
+                button.innerHTML = 'Unlike';
+                button.classList.remove('btn-outline-danger');
+                button.classList.add('btn-danger');
+                likeCountElement.innerHTML = data.likes_count;
+            });
+        }
+    }
 });
