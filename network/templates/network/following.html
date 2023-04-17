@@ -1,0 +1,16 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <h2>Posts from users you follow</h2>
+    {% for post in posts %}
+        <div class="card mb-3">
+            <div class="card-header">{{ post.user.username }} - {{ post.timestamp }}</div>
+            <div class="card-body">
+                <p>{{ post.content }}</p>
+                <p>Likes: {{ post.likes }}</p>
+            </div>
+        </div>
+    {% empty %}
+        <p>No posts from users you follow yet.</p>
+    {% endfor %}
+{% endblock %}

@@ -103,3 +103,12 @@ def profile(request, username):
             context["action"] = "Follow"
 
         return render(request, "network/profile.html", context)
+    
+
+@login_required
+def following(request):
+    # get the posts of the users that the current user is following
+    posts = Post.objects.filter(user__in=request.user.following.all()).order_by('-timestamp')
+
+    context = {'posts': posts}
+    return render(request, "network/following.html", context)
