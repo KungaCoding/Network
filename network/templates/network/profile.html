@@ -1,6 +1,7 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
+{% load static %}
     <h2>{{ user_profile.username }}'s Profile</h2>
     <p>Followers: {{ user_profile.followers.count }}</p>
     <p>Following: {{ user_profile.following.count }}</p>
@@ -17,9 +18,13 @@
     <h2>Posts</h2>
     {% for post in posts %}
         <div class="card mb-3">
-            <div class="card-header">{{ post.user.username }} - {{ post.timestamp }}</div>
+            <div class="card-header">{{ post.user.username }} - {{ post.timestamp }}
+            {% if user == post.user %}
+                <button class="edit-button" data-post="{{ post.id }}">Edit</button>
+            {% endif %}
+            </div>
             <div class="card-body">
-                <p>{{ post.content }}</p>
+                <p id="post-content-{{ post.id }}">{{ post.content }}</p>
                 <p>Likes: {{ post.likes }}</p>
             </div>
         </div>
@@ -42,4 +47,7 @@
             {% endif %}
         </span>
     </div>
+    {% block script %}
+        <script src="{% static 'network/edit_post.js' %}"></script>
+    {% endblock %}
 {% endblock %}

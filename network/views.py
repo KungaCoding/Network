@@ -1,11 +1,12 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+import json
+from django.views.decorators.csrf import csrf_exempt
 
 from .models import User, Post
 from .forms import PostForm
@@ -109,7 +110,7 @@ def profile(request, username):
     except EmptyPage:
         #if page is out of range, deliver last page of results
         posts = paginator_instance.page(Paginator.num_pages)
-        
+
     context = {
         'user_profile': user_profile,
         'posts': posts,
@@ -156,3 +157,23 @@ def following(request):
 
     context = {'posts': posts}
     return render(request, "network/following.html", context)
+
+
+@login_required
+@csrf_exempt
+def edit_post(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if request.user != post.user:
+        return (JsonResponse({"error": "You can only edit your own posts."}, status=403))
+    
+    if request.method == "POST":
+        data = json.loads(request.body)
+        post_content = data.get("content", "").strip()
+        print(f"Received POST data: {data}")
+        if post_content:
+            post.content = post_content
+            post.save()
+            return JsonResponse({'content': post.content})
+    return JsonResponse({"error": "Invalid Request"}, status=400)
+    

@@ -1,21 +1,8 @@
 {% extends "network/layout.html" %}
 
 {% block body %}
+{% load static %}
     {% if user.is_authenticated %}
-        <!-- 
-        -new post form here
-            -Submit
-                -on submit, post is added to database
-                    -data displayed/ saved:
-                        -username
-                        -timestamp
-                        -content
-                        -likes (start at 0)
-                -on submit, page is reloaded
-                -on submit, new post is rendered at top of page
-        -All posts renders here instead
-        -
-          -->
         <h2>New Post</h2>
         <form method="post">
             {% csrf_token %}
@@ -27,9 +14,13 @@
         {% for post in posts %}
             <div class="card mb-3">
                 <div class="card-header">
-                    <a href="{% url 'profile' post.user.username %}">{{ post.user.username }}</a> - {{ post.timestamp }}</div>
+                    <a href="{% url 'profile' post.user.username %}">{{ post.user.username }}</a> - {{ post.timestamp }}
+                    {% if user == post.user %}
+                        <button class="edit-button" data-post="{{ post.id }}">Edit</button>
+                    {% endif %}
+                </div>
                 <div class="card-body">
-                    <p>{{ post.content }}</p>
+                    <p id="post-content-{{ post.id }}">{{ post.content }}</p>
                     <p>Likes: {{ post.likes }}</p>
                 </div>
             </div>
@@ -55,4 +46,7 @@
             {% endif %}
         </span>
     </div>
+    {% block script %}
+        <script src="{% static 'network/edit_post.js' %}"></script>
+    {% endblock %}
 {% endblock %}
