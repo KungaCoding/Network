@@ -4,6 +4,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 from .models import User, Post
 from .forms import PostForm
@@ -21,6 +23,20 @@ def index(request):
     else:
         form = PostForm()
     posts = Post.objects.all().order_by('-timestamp')
+
+    #pagination
+    paginator_instance = Paginator(posts, 10)
+    page = request.GET.get('page')
+
+    try:
+        posts = paginator_instance.page(page)
+    except PageNotAnInteger:
+        #if page is not an integer, deliver first page
+        posts = paginator_instance.page(1)
+    except EmptyPage:
+        #if page is out of range, deliver last page of results
+        posts = paginator_instance.page(Paginator.num_pages)
+
     context = {'form': form, 'posts': posts}
     return render(request, "network/index.html", context)
 
@@ -81,6 +97,19 @@ def profile(request, username):
     user_profile = get_object_or_404(User, username=username)
     posts = Post.objects.filter(user=user_profile).order_by('-timestamp')
 
+    #pagination
+    paginator_instance = Paginator(posts, 10)
+    page = request.GET.get('page')
+    
+    try:
+        posts = paginator_instance.page(page)
+    except PageNotAnInteger:
+        #if page is not an integer, deliver first page
+        posts = paginator_instance.page(1) 
+    except EmptyPage:
+        #if page is out of range, deliver last page of results
+        posts = paginator_instance.page(Paginator.num_pages)
+        
     context = {
         'user_profile': user_profile,
         'posts': posts,
@@ -108,7 +137,22 @@ def profile(request, username):
 @login_required
 def following(request):
     # get the posts of the users that the current user is following
-    posts = Post.objects.filter(user__in=request.user.following.all()).order_by('-timestamp')
+    following_users = request.user.following.all()
+    posts = Post.objects.filter(user__in=following_users).order_by('-timestamp')
+
+    #pagination
+    paginator_instance = Paginator(posts, 10)
+    page = request.GET.get('page')
+
+    try:
+        posts = paginator_instance.page(page)
+    except PageNotAnInteger:
+        #if page is not an integer, deliver first page
+        posts = paginator_instance.page(1)
+    except EmptyPage:
+        #if page is out of range, deliver last page of results
+        posts = paginator_instance.page(Paginator.num_pages)
+
 
     context = {'posts': posts}
     return render(request, "network/following.html", context)
